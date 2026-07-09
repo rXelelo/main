@@ -43,7 +43,7 @@ Requires:       zstd
 
 Suggests:       lib32-gcc-libs
 
-Obsoletes:      %{Name}-multilib
+Obsoletes:      %{name}-multilib
 
 %description
 The gcc package contains the GNU Compiler Collection C and C++
