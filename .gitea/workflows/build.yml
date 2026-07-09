@@ -1,0 +1,60 @@
+name: Build RPM Package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: fedora:latest
+
+    steps:
+      - name: Install build tools
+        run: |
+          dnf install -y rpm-build rpmdevtools git
+          dnf install -y gmp-devel mpfr-devel libmpc-devel isl-devel zlib-devel libzstd-devel \
+            glibc-devel glibc-devel.i686 \
+            bison flex doxygen python3 rust \
+            gcc-c++ gcc-gnat gcc-gdc gcc-go libgphobos-static libxml2-devel
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up RPM build tree
+        run: |
+          rpmdev-setuptree
+
+      - name: Build all packages (skip dependency check)
+        run: |
+          for pkgdir in Packages/*/; do
+            name=$(basename "$pkgdir")
+            echo "=== Building $name ==="
+
+            spec="${pkgdir}${name}.spec"
+            if [ ! -f "$spec" ]; then
+              echo "No spec found at $spec, skipping"
+              continue
+            fi
+
+            # Copy spec and local sources into rpmbuild tree
+            cp "$spec" ~/rpmbuild/SPECS/
+            find "$pkgdir" -maxdepth 1 -type f ! -name "*.spec" -exec cp {} ~/rpmbuild/SOURCES/ \;
+
+            # Download remote sources referenced in the spec
+            spectool -g -C ~/rpmbuild/SOURCES/ ~/rpmbuild/SPECS/"$name.spec"
+
+            rpmbuild -bb --nodeps ~/rpmbuild/SPECS/"$name.spec"
+          done
+
+      - name: Upload built RPMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-packages
+          path: ~/rpmbuild/RPMS/**/*.rpm
