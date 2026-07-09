@@ -671,35 +671,51 @@ fi
 
 %post -n libgccjit
 /sbin/install-info %{_infodir}/libgccjit.info %{_infodir}/dir || :
+/sbin/ldconfig
 
 %preun -n libgccjit
 if [ $1 -eq 0 ]; then
     /sbin/install-info --delete %{_infodir}/libgccjit.info %{_infodir}/dir || :
 fi
 
+%postun -n libgccjit
+/sbin/ldconfig
+
 %post -n libgomp
 /sbin/install-info %{_infodir}/libgomp.info %{_infodir}/dir || :
+/sbin/ldconfig
 
 %preun -n libgomp
 if [ $1 -eq 0 ]; then
     /sbin/install-info --delete %{_infodir}/libgomp.info %{_infodir}/dir || :
 fi
 
+%postun -n libgomp
+/sbin/ldconfig
+
 %post -n libitm
 /sbin/install-info %{_infodir}/libitm.info %{_infodir}/dir || :
+/sbin/ldconfig
 
 %preun -n libitm
 if [ $1 -eq 0 ]; then
     /sbin/install-info --delete %{_infodir}/libitm.info %{_infodir}/dir || :
 fi
 
+%postun -n libitm
+/sbin/ldconfig
+
 %post -n libquadmath
 /sbin/install-info %{_infodir}/libquadmath.info %{_infodir}/dir || :
+/sbin/ldconfig
 
 %preun -n libquadmath
 if [ $1 -eq 0 ]; then
     /sbin/install-info --delete %{_infodir}/libquadmath.info %{_infodir}/dir || :
 fi
+
+%postun -n libquadmath
+/sbin/ldconfig
 
 %post -n libgcc
 /sbin/ldconfig
@@ -761,34 +777,16 @@ fi
 %postun -n libgo
 /sbin/ldconfig
 
-%post -n libgomp
-/sbin/ldconfig
-
-%postun -n libgomp
-/sbin/ldconfig
-
 %post -n libgphobos
 /sbin/ldconfig
 
 %postun -n libgphobos
 /sbin/ldconfig
 
-%post -n libitm
-/sbin/ldconfig
-
-%postun -n libitm
-/sbin/ldconfig
-
 %post -n libobjc
 /sbin/ldconfig
 
 %postun -n libobjc
-/sbin/ldconfig
-
-%post -n libquadmath
-/sbin/ldconfig
-
-%postun -n libquadmath
 /sbin/ldconfig
 
 %post -n libgcobol
@@ -807,12 +805,6 @@ fi
 /sbin/ldconfig
 
 %postun -n lib32-gcc-libs
-/sbin/ldconfig
-
-%post -n libgccjit
-/sbin/ldconfig
-
-%postun -n libgccjit
 /sbin/ldconfig
 
 
