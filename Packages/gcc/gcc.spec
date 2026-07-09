@@ -26,12 +26,12 @@ BuildRequires:  zstd
 
 # -------- GCC (base) --------
 
-Requires:       libasan = %{Version}-%{Release}
-Requires:       libgcc = %{Version}-%{Release}
-Requires:       libhwasan = %{Version}-%{Release}
-Requires:       liblsan = %{Version}-%{Release}
-Requires:       libstdc++ = %{Version}-%{Release}
-Requires:       libubsan = %{Version}-%{Release}
+Requires:       libasan = %{version}-%{release}
+Requires:       libgcc = %{version}-%{release}
+Requires:       libhwasan = %{version}-%{release}
+Requires:       liblsan = %{version}-%{release}
+Requires:       libstdc++ = %{version}-%{release}
+Requires:       libubsan = %{version}-%{release}
 Requires:       binutils >= 2.28
 Requires:       glibc >= 2.27
 Requires:       gmp
