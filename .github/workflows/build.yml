@@ -22,7 +22,7 @@ jobs:
           dnf install -y gmp-devel mpfr-devel libmpc-devel isl-devel zlib-devel libzstd-devel \
             glibc-devel glibc-devel.i686 \
             bison flex doxygen python3 rust cargo \
-            gcc-c++ gcc-gnat gcc-gdc gcc-go libgphobos-static libxml2-devel gmp-devel mpfr-devel libmpc-devel
+            gcc-c++ gcc-gnat gcc-gdc gcc-go libgphobos-static libxml2-devel gmp-devel mpfr-devel libmpc-devel texinfo
 
       - name: Checkout code
         uses: actions/checkout@v4
