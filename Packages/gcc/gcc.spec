@@ -536,7 +536,6 @@ CONFFLAGS="
     --mandir=%{_mandir} \
     --infodir=%{_infodir} \
     --with-bugurl=https://varclen.nohi.click/Packages/Main/issues \
-    --with-build-config=bootstrap-lto \
     --with-gcc-major-version-only \
     --with-linker-hash-style=gnu \
     --with-system-zlib \
@@ -565,12 +564,13 @@ CFLAGS="${CFLAGS/-Werror=format-security/}"
 CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
 export CFLAGS CXXFLAGS
 
-# Navigate up and build from the explicit build tree sibling directories
+# --- STAGE 1: Build main GCC ---
 cd ../gcc-build
 
 ../gcc-%{version}/configure \
     --enable-languages=ada,c,c++,d,fortran,go,lto,m2,objc,obj-c++,rust,cobol \
     --enable-bootstrap \
+    --with-build-config=bootstrap-lto \
     $CONFFLAGS
 
 make %{?_smp_mflags} -O \
@@ -582,18 +582,24 @@ make %{?_smp_mflags} -O \
 
 make -O -C %{_target_platform}/libstdc++-v3/doc doc-man-doxygen
 
+
 # --- STAGE 2: Build libgccjit separately ---
 cd ../libgccjit-build
 
+# Note: We intentionally drop bootstrap-lto here because jit is configured with --disable-bootstrap
 ../gcc-%{version}/configure \
     --enable-languages=jit \
     --disable-bootstrap \
     --enable-host-shared \
     $CONFFLAGS
 
+# We target 'all-gcc' which compiles the driver and jit backend
 make %{?_smp_mflags} -O all-gcc
 
+# The .so files are located inside the nested gcc subdirectory; copy them safely to the main build tree
+mkdir -p ../gcc-build/gcc
 cp -a gcc/libgccjit.so* ../gcc-build/gcc/
+
 
 %install
 cd ../gcc-build
