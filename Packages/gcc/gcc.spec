@@ -65,7 +65,7 @@ Requires:       mpfr
 Requires:       zlib
 Requires:       zstd
 
-Obsoletes:      %{name}-multilib
+Obsoletes:      %{name}-ada-multilib
 
 %description ada
 The GNAT Ada 83/95/2005/2012 front end for GCC, providing gnat,
@@ -107,8 +107,8 @@ Requires:       mpfr
 Requires:       zlib
 Requires:       zstd
 
-Provides:       %{name}-multilib
-Obsoletes:      %{name}-multilib
+Provides:       %{name}-fortran-multilib
+Obsoletes:      %{name}-fortran-multilib
 
 %description fortran
 The Fortran front end for GCC (gfortran).
@@ -146,9 +146,9 @@ Requires:       mpfr
 Requires:       zlib
 Requires:       zstd
 
-Provides:       %{name}-multilib
+Provides:       %{name}-go-multilib
 Provides:       go = 1.17
-Obsoletes:      %{name}-multilib
+Obsoletes:      %{name}-go-multilib
 Conflicts:      go
 
 %description go
@@ -173,7 +173,7 @@ Requires:       libstdc++
 Requires:       libtsan
 Requires:       libubsan
 
-Provides:       %{name}-multilib
+Provides:       %{name}-libs-multilib
 
 %description libs
 Metapackage pulling in the full set of GCC runtime libraries.
@@ -211,8 +211,8 @@ Requires:       mpfr
 Requires:       zlib
 Requires:       zstd
 
-Provides:       %{name}-multilib
-Obsoletes:      %{name}-multilib
+Provides:       %{name}-objc-multilib
+Obsoletes:      %{name}-objc-multilib
 
 %description objc
 The Objective-C front end for GCC.
@@ -524,7 +524,6 @@ file contents.
 
 %prep
 %setup -q
-
 # Set up build environments relative to the source tree root
 mkdir -p ../gcc-build ../libgccjit-build
 
@@ -537,7 +536,7 @@ CONFFLAGS="
     --mandir=%{_mandir} \
     --infodir=%{_infodir} \
     --with-bugurl=https://varclen.nohi.click/Packages/Main/issues \
-    --with-build-config=bootstrap-lto \
+    --with-build-config=bootstrap-debug \
     --with-gcc-major-version-only \
     --with-linker-hash-style=gnu \
     --with-system-zlib \
@@ -552,7 +551,7 @@ CONFFLAGS="
     --enable-link-serialization=1 \
     --enable-linker-build-id \
     --enable-lto \
-    --enable-multilib \
+    --disable-multilib \
     --enable-plugin \
     --enable-shared \
     --enable-threads=posix \
@@ -566,22 +565,52 @@ CFLAGS="${CFLAGS/-Werror=format-security/}"
 CXXFLAGS="${CXXFLAGS/-Werror=format-security/}"
 export CFLAGS CXXFLAGS
 
-# Navigate up and build from the explicit build tree sibling directories
+run_with_progress() {
+    local total_estimate=$1
+    shift
+    local n=0
+    "$@" 2>&1 | tee build.log | while IFS= read -r line; do
+        case "$line" in
+            *" -c "*|*"cc1 "*|*"cc1plus "*|*"CC "*|*"CXX "*)
+                n=$((n+1))
+                pct=$(( n * 100 / total_estimate ))
+                (( pct > 100 )) && pct=100
+                filled=$(( pct / 2 ))
+                empty=$(( 50 - filled ))
+                bar=$(printf '%%*s' "$filled" '' | tr ' ' '#')
+                gap=$(printf '%%*s' "$empty" '')
+                printf "\r[%%s%%s] %%3d%%%% (%%d/%%d files)" "$bar" "$gap" "$pct" "$n" "$total_estimate"
+                ;;
+        esac
+    done
+    local status=${PIPESTATUS[0]}
+    echo ""
+    return $status
+}
+
 cd ../gcc-build
 
 ../gcc-%{version}/configure \
-    --enable-languages=ada,c,c++,d,fortran,go,lto,m2,objc,obj-c++,rust,cobol \
-    --enable-bootstrap \
+    --enable-languages=c,c++,d,fortran,go,lto,m2,objc,obj-c++,rust,cobol,ada \
+    --disable-bootstrap \
     $CONFFLAGS
 
-make %{?_smp_mflags} -O \
-    STAGE1_CFLAGS="-O2" \
-    BOOT_CFLAGS="$CFLAGS" \
-    BOOT_LDFLAGS="$LDFLAGS" \
-    LDFLAGS_FOR_TARGET="$LDFLAGS" \
-    bootstrap
+TOTAL_FILES=$(make -j1 -n 2>/dev/null | grep -cE '(^| )(gcc|g\+\+|cc1|cc1plus)( |$)' || true)
+[ -z "$TOTAL_FILES" ] && TOTAL_FILES=0
+[ "$TOTAL_FILES" -lt 1 ] && TOTAL_FILES=5000
 
-make -O -C %{_target_platform}/libstdc++-v3/doc doc-man-doxygen
+set +x
+run_with_progress "$TOTAL_FILES" \
+    make -j3 -l4.0 -O \
+        STAGE1_CFLAGS="-O2" \
+        BOOT_CFLAGS="$CFLAGS" \
+        BOOT_LDFLAGS="$LDFLAGS" \
+        LDFLAGS_FOR_TARGET="$LDFLAGS"
+set -x
+
+if [ "${BUILD_DOCS:-0}" = "1" ]; then
+    make -j3 -O -C %{_target_platform}/libstdc++-v3/doc doc-man-doxygen
+fi
 
 # --- STAGE 2: Build libgccjit separately ---
 cd ../libgccjit-build
@@ -592,10 +621,15 @@ cd ../libgccjit-build
     --enable-host-shared \
     $CONFFLAGS
 
-make %{?_smp_mflags} -O all-gcc
+TOTAL_JIT=$(make -j1 -n all-gcc 2>/dev/null | grep -cE '(^| )(gcc|g\+\+|cc1|cc1plus)( |$)' || true)
+[ -z "$TOTAL_JIT" ] && TOTAL_JIT=0
+[ "$TOTAL_JIT" -lt 1 ] && TOTAL_JIT=2000
+
+set +x
+run_with_progress "$TOTAL_JIT" make -j3 -l4.0 -O all-gcc
+set -x
 
 cp -a gcc/libgccjit.so* ../gcc-build/gcc/
-
 
 %install
 cd ../gcc-build
