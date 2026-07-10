@@ -21,8 +21,8 @@ jobs:
           dnf install -y rpm-build rpmdevtools git nodejs
           dnf install -y gmp-devel mpfr-devel libmpc-devel isl-devel zlib-devel libzstd-devel \
             glibc-devel glibc-devel.i686 \
-            bison flex doxygen python3 rust \
-            gcc-c++ gcc-gnat gcc-gdc gcc-go libgphobos-static libxml2-devel
+            bison flex doxygen python3 rust cargo \
+            gcc-c++ gcc-gnat gcc-gdc gcc-go libgphobos-static libxml2-devel gmp-devel mpfr-devel libmpc-devel
 
       - name: Checkout code
         uses: actions/checkout@v4
