@@ -31,6 +31,13 @@ jobs:
         run: |
           rpmdev-setuptree
 
+      - name: Add swap
+        run: |
+          sudo fallocate -l 8G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
       - name: Debug mount options
         run: |
           mount | grep -E 'github|tmp'
