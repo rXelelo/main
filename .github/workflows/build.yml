@@ -33,11 +33,21 @@ jobs:
 
       - name: Add swap
         run: |
-          sudo fallocate -l 8G /swapfile
+          # Check if swap already exists
+          sudo swapon --show
+          free -h
+
+          # Remove any pre-existing swapfile first
+          sudo swapoff /swapfile 2>/dev/null || true
+          sudo rm -f /swapfile
+          
+          # Use dd (not fallocate) — avoids sparse-file issues on overlay/some ext4 configs
+          sudo dd if=/dev/zero of=/swapfile bs=1M count=8192 status=progress
           sudo chmod 600 /swapfile
           sudo mkswap /swapfile
           sudo swapon /swapfile
-
+          free -h
+          
       - name: Debug mount options
         run: |
           mount | grep -E 'github|tmp'
