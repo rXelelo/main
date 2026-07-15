@@ -76,6 +76,14 @@ cd ../binutils-build
 ../binutils-%{version}/configure \
     "${CONFFLAGS[@]}"
 
+# libtool hardcodes an RPATH/RUNPATH of --libdir into every binary and
+# shared lib. binutils' top-level configure recursively configures every
+# subdirectory (bfd, gas, ld, gprofng, binutils, ...) and each gets its
+# own generated 'libtool' script, so patch all of them, not just the top one.
+find . -name libtool -type f -print0 | xargs -0 sed -i.rpath \
+    -e 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|' \
+    -e 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|'
+
 make %{?_smp_mflags}
 
 
