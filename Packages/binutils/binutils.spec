@@ -43,7 +43,7 @@ mkdir -p binutils-build
 CONFFLAGS=(
     --prefix=%{_prefix} \
     --sysconfdir=%{_sysconfdir} \
-    --with-lib-path=%{_libdir}:/usr/local/lib64 \
+    --with-lib-path=%{_libdir}:%{_prefix}/local/lib64 \
     --with-bugurl= \
     --enable-cet \
     --enable-colored-disassembly \
@@ -86,23 +86,23 @@ cd ../binutils-build
 find %{buildroot} -name '*.la' -delete
 
 # install PIC version of libiberty
-install -m644 libiberty/pic/libiberty.a %{buildroot}/usr/lib
+install -m644 libiberty/pic/libiberty.a %{buildroot}%{_libdir}
 
 # Remove unwanted files
-rm -f %{buildroot}/usr/share/man/man1/{dlltool,windres,windmc}*
+rm -f %{buildroot}%{_datadir}/man/man1/{dlltool,windres,windmc}*
 
 # No shared linking to these files outside binutils
-rm -f %{buildroot}/usr/lib/lib{bfd,opcodes}.so
-tee %{buildroot}/usr/lib/libbfd.so << EOS
+rm -f %{buildroot}%{_prefix}/lib/lib{bfd,opcodes}.so
+tee %{buildroot}%{_libdir}/libbfd.so << EOS
 /* GNU ld script */
 
-INPUT( /usr/lib/libbfd.a -lsframe -liberty -lz -lzstd -ldl )
+INPUT( %{_prefix}/lib/libbfd.a -lsframe -liberty -lz -lzstd -ldl )
 EOS
 
-  tee %{buildroot}/usr/lib/libopcodes.so << EOS
+  tee %{buildroot}%{_prefix}/lib/libopcodes.so << EOS
 /* GNU ld script */
 
-INPUT( /usr/lib/libopcodes.a -lbfd )
+INPUT( %{_prefix}/lib/libopcodes.a -lbfd )
 EOS
 
 # Extract the FSF All Permissive License
@@ -112,7 +112,8 @@ tail -n 5 ../binutils-%{version}/ld/scripttempl/README > FSFAP
 
 %files
 %license ../binutils-build/FSFAP
-/usr/bin/addr2line
+%{_sysconfdir}/gprofng.rc
+%{_bindir}/addr2line
 %{_bindir}/ar
 %{_bindir}/as
 %{_bindir}/c++filt
@@ -168,36 +169,134 @@ tail -n 5 ../binutils-%{version}/ld/scripttempl/README > FSFAP
 %{_includedir}/sframe-api.h
 %{_includedir}/sframe.h
 %{_includedir}/symcat.h
-/usr/lib/bfd-plugins/libdep.so
-/usr/lib/gprofng/libgp-collector.so
-/usr/lib/gprofng/libgp-collectorAPI.a
-/usr/lib/gprofng/libgp-collectorAPI.so
-/usr/lib/gprofng/libgp-heap.so
-/usr/lib/gprofng/libgp-iotrace.so
-/usr/lib/gprofng/libgp-sync.so
-/usr/lib/libbfd-2.46.1.so
-/usr/lib/libbfd.a
-/usr/lib/libbfd.so
-/usr/lib/libctf-nobfd.a
-/usr/lib/libctf-nobfd.so
-/usr/lib/libctf-nobfd.so.0
-/usr/lib/libctf-nobfd.so.0.0.0
-/usr/lib/libctf.a
-/usr/lib/libctf.so
-/usr/lib/libctf.so.0
-/usr/lib/libctf.so.0.0.0
-/usr/lib/libgprofng.a
-/usr/lib/libgprofng.so
-/usr/lib/libgprofng.so.0
-/usr/lib/libgprofng.so.0.0.0
-/usr/lib/libiberty.a
-/usr/lib/libopcodes-2.46.1.so
-/usr/lib/libopcodes.a
-/usr/lib/libopcodes.so
-/usr/lib/libsframe.a
-/usr/lib/libsframe.so
-/usr/lib/libsframe.so.3
-/usr/lib/libsframe.so.3.0.0
+%{_prefix}/lib/ldscripts/elf32_x86_64.x
+%{_prefix}/lib/ldscripts/elf32_x86_64.xbn
+%{_prefix}/lib/ldscripts/elf32_x86_64.xc
+%{_prefix}/lib/ldscripts/elf32_x86_64.xce
+%{_prefix}/lib/ldscripts/elf32_x86_64.xcer
+%{_prefix}/lib/ldscripts/elf32_x86_64.xd
+%{_prefix}/lib/ldscripts/elf32_x86_64.xdc
+%{_prefix}/lib/ldscripts/elf32_x86_64.xdce
+%{_prefix}/lib/ldscripts/elf32_x86_64.xdcer
+%{_prefix}/lib/ldscripts/elf32_x86_64.xde
+%{_prefix}/lib/ldscripts/elf32_x86_64.xder
+%{_prefix}/lib/ldscripts/elf32_x86_64.xdw
+%{_prefix}/lib/ldscripts/elf32_x86_64.xdwe
+%{_prefix}/lib/ldscripts/elf32_x86_64.xdwer
+%{_prefix}/lib/ldscripts/elf32_x86_64.xe
+%{_prefix}/lib/ldscripts/elf32_x86_64.xer
+%{_prefix}/lib/ldscripts/elf32_x86_64.xn
+%{_prefix}/lib/ldscripts/elf32_x86_64.xr
+%{_prefix}/lib/ldscripts/elf32_x86_64.xs
+%{_prefix}/lib/ldscripts/elf32_x86_64.xsc
+%{_prefix}/lib/ldscripts/elf32_x86_64.xsce
+%{_prefix}/lib/ldscripts/elf32_x86_64.xscer
+%{_prefix}/lib/ldscripts/elf32_x86_64.xse
+%{_prefix}/lib/ldscripts/elf32_x86_64.xser
+%{_prefix}/lib/ldscripts/elf32_x86_64.xsw
+%{_prefix}/lib/ldscripts/elf32_x86_64.xswe
+%{_prefix}/lib/ldscripts/elf32_x86_64.xswer
+%{_prefix}/lib/ldscripts/elf32_x86_64.xu
+%{_prefix}/lib/ldscripts/elf32_x86_64.xw
+%{_prefix}/lib/ldscripts/elf32_x86_64.xwe
+%{_prefix}/lib/ldscripts/elf32_x86_64.xwer
+%{_prefix}/lib/ldscripts/elf64bpf.x
+%{_prefix}/lib/ldscripts/elf64bpf.xbn
+%{_prefix}/lib/ldscripts/elf64bpf.xe
+%{_prefix}/lib/ldscripts/elf64bpf.xer
+%{_prefix}/lib/ldscripts/elf64bpf.xn
+%{_prefix}/lib/ldscripts/elf64bpf.xr
+%{_prefix}/lib/ldscripts/elf64bpf.xu
+%{_prefix}/lib/ldscripts/elf_i386.x
+%{_prefix}/lib/ldscripts/elf_i386.xbn
+%{_prefix}/lib/ldscripts/elf_i386.xc
+%{_prefix}/lib/ldscripts/elf_i386.xce
+%{_prefix}/lib/ldscripts/elf_i386.xcer
+%{_prefix}/lib/ldscripts/elf_i386.xd
+%{_prefix}/lib/ldscripts/elf_i386.xdc
+%{_prefix}/lib/ldscripts/elf_i386.xdce
+%{_prefix}/lib/ldscripts/elf_i386.xdcer
+%{_prefix}/lib/ldscripts/elf_i386.xde
+%{_prefix}/lib/ldscripts/elf_i386.xder
+%{_prefix}/lib/ldscripts/elf_i386.xdw
+%{_prefix}/lib/ldscripts/elf_i386.xdwe
+%{_prefix}/lib/ldscripts/elf_i386.xdwer
+%{_prefix}/lib/ldscripts/elf_i386.xe
+%{_prefix}/lib/ldscripts/elf_i386.xer
+%{_prefix}/lib/ldscripts/elf_i386.xn
+%{_prefix}/lib/ldscripts/elf_i386.xr
+%{_prefix}/lib/ldscripts/elf_i386.xs
+%{_prefix}/lib/ldscripts/elf_x86_64.xdce
+%{_prefix}/lib/ldscripts/elf_x86_64.xdcer
+%{_prefix}/lib/ldscripts/elf_x86_64.xde
+%{_prefix}/lib/ldscripts/elf_x86_64.xder
+%{_prefix}/lib/ldscripts/elf_x86_64.xdw
+%{_prefix}/lib/ldscripts/elf_x86_64.xdwe
+%{_prefix}/lib/ldscripts/elf_x86_64.xdwer
+%{_prefix}/lib/ldscripts/elf_x86_64.xe
+%{_prefix}/lib/ldscripts/elf_x86_64.xer
+%{_prefix}/lib/ldscripts/elf_x86_64.xn
+%{_prefix}/lib/ldscripts/elf_x86_64.xr
+%{_prefix}/lib/ldscripts/elf_x86_64.xs
+%{_prefix}/lib/ldscripts/elf_x86_64.xsc
+%{_prefix}/lib/ldscripts/elf_x86_64.xsce
+%{_prefix}/lib/ldscripts/elf_x86_64.xscer
+%{_prefix}/lib/ldscripts/elf_x86_64.xse
+%{_prefix}/lib/ldscripts/elf_x86_64.xser
+%{_prefix}/lib/ldscripts/elf_x86_64.xsw
+%{_prefix}/lib/ldscripts/elf_x86_64.xswe
+%{_prefix}/lib/ldscripts/elf_x86_64.xswer
+%{_prefix}/lib/ldscripts/elf_x86_64.xu
+%{_prefix}/lib/ldscripts/elf_x86_64.xw
+%{_prefix}/lib/ldscripts/elf_x86_64.xwe
+%{_prefix}/lib/ldscripts/elf_x86_64.xwer
+%{_prefix}/lib/ldscripts/i386pe.x
+%{_prefix}/lib/ldscripts/i386pe.xa
+%{_prefix}/lib/ldscripts/i386pe.xbn
+%{_prefix}/lib/ldscripts/i386pe.xe
+%{_prefix}/lib/ldscripts/i386pe.xer
+%{_prefix}/lib/ldscripts/i386pe.xn
+%{_prefix}/lib/ldscripts/i386pe.xr
+%{_prefix}/lib/ldscripts/i386pe.xu
+%{_prefix}/lib/ldscripts/i386pep.x
+%{_prefix}/lib/ldscripts/i386pep.xa
+%{_prefix}/lib/ldscripts/i386pep.xbn
+%{_prefix}/lib/ldscripts/i386pep.xe
+%{_prefix}/lib/ldscripts/i386pep.xer
+%{_prefix}/lib/ldscripts/i386pep.xn
+%{_prefix}/lib/ldscripts/i386pep.xr
+%{_prefix}/lib/ldscripts/i386pep.xu
+%{_prefix}/lib/ldscripts/stamp
+%{_prefix}/lib/bfd-plugins/libdep.so
+%{_prefix}/lib/gprofng/libgp-collector.so
+%{_prefix}/lib/gprofng/libgp-collectorAPI.a
+%{_prefix}/lib/gprofng/libgp-collectorAPI.so
+%{_prefix}/lib/gprofng/libgp-heap.so
+%{_prefix}/lib/gprofng/libgp-iotrace.so
+%{_prefix}/lib/gprofng/libgp-sync.so
+%{_prefix}/lib/libbfd-2.46.1.so
+%{_prefix}/lib/libbfd.a
+%{_prefix}/lib/libbfd.so
+%{_prefix}/lib/libctf-nobfd.a
+%{_prefix}/lib/libctf-nobfd.so
+%{_prefix}/lib/libctf-nobfd.so.0
+%{_prefix}/lib/libctf-nobfd.so.0.0.0
+%{_prefix}/lib/libctf.a
+%{_prefix}/lib/libctf.so
+%{_prefix}/lib/libctf.so.0
+%{_prefix}/lib/libctf.so.0.0.0
+%{_prefix}/lib/libgprofng.a
+%{_prefix}/lib/libgprofng.so
+%{_prefix}/lib/libgprofng.so.0
+%{_prefix}/lib/libgprofng.so.0.0.0
+%{_prefix}/lib/libiberty.a
+%{_prefix}/lib/libopcodes-2.46.1.so
+%{_prefix}/lib/libopcodes.a
+%{_prefix}/lib/libopcodes.so
+%{_prefix}/lib/libsframe.a
+%{_prefix}/lib/libsframe.so
+%{_prefix}/lib/libsframe.so.3
+%{_prefix}/lib/libsframe.so.3.0.0
 %{_libdir}/libiberty.a
 %{_datadir}/doc/gprofng/examples.tar.gz
 %{_infodir}/as.info.gz
