@@ -32,9 +32,6 @@ jobs:
         run: |
           rpmdev-setuptree
 
-          rm -f /usr/lib/rpm/macros.d/macros.*
-          rm /usr/lib/rpm/redhat/macros
-
           cat > ~/.rpmmacros << EOF
           #==============================================================================
           # LFS-from-scratch RPM build macros
