@@ -1,3 +1,5 @@
+%global toolname binutils
+
 Name:           binutils
 Version:        2.46.1
 Release:        1%{?dist}
@@ -40,7 +42,7 @@ mkdir -p binutils-build
 %build
 CONFFLAGS=(
     --prefix=%{_prefix} \
-    --sysconfdir=%{sysconfdir} \
+    --sysconfdir=%{_sysconfdir} \
     --with-lib-path=%{_libdir}:/usr/local/lib64 \
     --with-bugurl= \
     --enable-cet \
@@ -78,18 +80,39 @@ make %{?_smp_mflags}
 
 
 %install
-cd build
+cd ../binutils-build
 make DESTDIR=%{buildroot} tooldir=%{buildroot}%{_prefix} install
 
 # Remove libtool archives, we ship shared libs instead
 find %{buildroot} -name '*.la' -delete
 
-# Some binutils installs drop libiberty.a — not needed at runtime
-rm -f %{buildroot}%{_libdir}/libiberty.a
+# install PIC version of libiberty
+install -m644 libiberty/pic/libiberty.a %{buildroot}/usr/lib
+
+# Remove unwanted files
+rm -f %{buildroot}/usr/share/man/man1/{dlltool,windres,windmc}*
+
+# No shared linking to these files outside binutils
+rm -f %{buildroot}/usr/lib/lib{bfd,opcodes}.so
+tee %{buildroot}/usr/lib/libbfd.so << EOS
+/* GNU ld script */
+
+INPUT( /usr/lib/libbfd.a -lsframe -liberty -lz -lzstd -ldl )
+EOS
+
+  tee %{buildroot}/usr/lib/libopcodes.so << EOS
+/* GNU ld script */
+
+INPUT( /usr/lib/libopcodes.a -lbfd )
+EOS
+
+# Extract the FSF All Permissive License
+# <https://www.gnu.org/prep/maintain/html_node/License-Notices-for-Other-Files.html>
+# used for some linker scripts.
+tail -n 5 ../binutils-%{version}/ld/scripttempl/README > FSFAP
 
 %files
-%license COPYING COPYING.LIB COPYING3 COPYING3.LIB
-%doc NEWS README
+%license ../binutils-build/FSFAP
 
 %changelog
 * Wed Jul 15 2026 Rain Xelelo <rxelelo@outlook.com> - 2.46.1-1
