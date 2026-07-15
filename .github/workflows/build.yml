@@ -23,7 +23,7 @@ jobs:
             glibc-devel glibc-devel.i686 \
             bison flex doxygen python3 rust cargo \
             gcc-c++ gcc-gnat gcc-gdc gcc-go libgphobos-static libxml2-devel gmp-devel mpfr-devel libmpc-devel texinfo \
-            chrpath
+            chrpath elfutils-debuginfod-client-devel
 
       - name: Checkout code
         uses: actions/checkout@v4

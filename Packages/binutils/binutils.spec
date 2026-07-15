@@ -54,7 +54,6 @@ CONFFLAGS=(
     --enable-jansson \
     --enable-ld=default \
     --enable-new-dtags \
-    --enable-pgo-build=lto \
     --enable-plugins \
     --enable-relro \
     --enable-shared \
