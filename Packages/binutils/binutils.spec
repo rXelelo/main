@@ -1,3 +1,5 @@
+%global debug_package %{nil}
+
 Name:           binutils
 Version:        2.46.1
 Release:        1%{?dist}
