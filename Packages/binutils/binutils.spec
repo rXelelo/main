@@ -1,5 +1,3 @@
-%global toolname binutils
-
 Name:           binutils
 Version:        2.46.1
 Release:        1%{?dist}
@@ -80,7 +78,7 @@ make %{?_smp_mflags}
 
 %install
 cd ../binutils-build
-make DESTDIR=%{buildroot} tooldir=%{buildroot}%{_prefix} install
+%make_install DESTDIR=%{buildroot} tooldir=%{buildroot}%{_prefix}
 
 # Remove libtool archives, we ship shared libs instead
 find %{buildroot} -name '*.la' -delete
