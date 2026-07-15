@@ -34,34 +34,48 @@ zstd for compressed debug sections, and libctf support (jansson +
 libelf) for CTF debug data.
 
 %prep
+mkdir -p binutils-build
 %setup -q -n binutils-%{version}
 
 %build
-mkdir -v build
-cd build
-
-../configure \
+CONFFLAGS=(
     --prefix=%{_prefix} \
-    --libdir=%{_libdir} \
-    --sysconfdir=%{_sysconfdir} \
-    --infodir=%{_infodir} \
-    --mandir=%{_mandir} \
-    --build=%{_build} \
-    --host=%{_host} \
-    --enable-gold=default \
-    --enable-ld=yes \
+    --sysconfdir=%{sysconfdir} \
+    --with-lib-path=%{_libdir}:/usr/local/lib64 \
+    --with-bugurl= \
+    --enable-cet \
+    --enable-colored-disassembly \
+    --enable-default-execstack=no \
+    --enable-deterministic-archives \
+    --enable-gold \
+    --enable-install-libiberty \
+    --enable-jansson \
+    --enable-ld=default \
+    --enable-new-dtags \
+    --enable-pgo-build=lto \
     --enable-plugins \
+    --enable-relro \
     --enable-shared \
-    --enable-64-bit-bfd \
-    --enable-libctf \
-    --enable-default-hash-style=gnu \
-    --with-system-zlib \
-    --with-zstd \
+    --enable-targets=x86_64-pep,bpf-unknown-none \
+    --enable-threads \
+    --disable-gdb \
+    --disable-gdbserver \
+    --disable-libdecnumber \
+    --disable-readline \
+    --disable-sim \
     --disable-werror \
-    --disable-static
+    --with-debuginfod \
+    --with-pic \
+    --with-system-zlib
+)
 
-%{?_smp_mflags:make %{_smp_mflags} tooldir=%{_prefix}}
-%{!?_smp_mflags:make tooldir=%{_prefix}}
+cd ../binutils-build
+
+../binutils-%{version}/configure \
+    "${CONFFLAGS[@]}"
+
+make %{?_smp_mflags}
+
 
 %install
 cd build
