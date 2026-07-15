@@ -80,7 +80,7 @@ make %{?_smp_mflags}
 
 %install
 cd ../binutils-build
-%make_install DESTDIR=%{buildroot} tooldir=%{buildroot}%{_prefix}
+%make_install tooldir=%{_prefix}
 
 # Remove libtool archives, we ship shared libs instead
 find %{buildroot} -name '*.la' -delete
