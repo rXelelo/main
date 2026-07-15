@@ -76,14 +76,6 @@ cd ../binutils-build
 ../binutils-%{version}/configure \
     "${CONFFLAGS[@]}"
 
-# libtool hardcodes an RPATH/RUNPATH of --libdir into every binary and
-# shared lib. binutils' top-level configure recursively configures every
-# subdirectory (bfd, gas, ld, gprofng, binutils, ...) and each gets its
-# own generated 'libtool' script, so patch all of them, not just the top one.
-find . -name libtool -type f -print0 | xargs -0 sed -i.rpath \
-    -e 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|' \
-    -e 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|'
-
 make %{?_smp_mflags}
 
 
@@ -113,6 +105,15 @@ EOS
 
 INPUT( %{_libdir}/libopcodes.a -lbfd )
 EOS
+
+find %{buildroot} -type f \( -perm -0100 -o -perm -0010 -o -perm -0001 \) \
+    -exec sh -c '
+        for f; do
+            if head -c4 "$f" 2>/dev/null | grep -q ELF; then
+                chrpath --delete "$f" >/dev/null 2>&1 || :
+            fi
+        done
+    ' _ {} + 2>/dev/null || :
 
 # Extract the FSF All Permissive License
 # <https://www.gnu.org/prep/maintain/html_node/License-Notices-for-Other-Files.html>
