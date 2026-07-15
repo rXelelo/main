@@ -32,6 +32,47 @@ jobs:
         run: |
           rpmdev-setuptree
           
+          rm -f /usr/lib/rpm/macros.d/macros.*
+          rm /usr/lib/rpm/macros
+          rm /usr/lib/rpm/redhat/macros
+
+          cat > ~/.rpmmacros << EOF
+          #==============================================================================
+          # LFS-from-scratch RPM build macros
+          # Standard Fedora lib64 multilib convention, hardening/annobin/LTO disabled
+          #==============================================================================
+
+          # --- Standard Fedora lib64 paths (DO NOT override these — use defaults) ---
+          %_vendor        varclen
+          %_prefix        /usr
+          %_exec_prefix   %{_prefix}
+          %_bindir        %{_exec_prefix}/bin
+          %_sbindir       %{_exec_prefix}/sbin
+          %_libdir        %{_exec_prefix}/lib64
+          %_libexecdir    %{_exec_prefix}/libexec
+          %_datadir       %{_prefix}/share
+          %_mandir        %{_datadir}/man
+          %_infodir       %{_datadir}/info
+          %_includedir    %{_prefix}/include
+          %_sysconfdir    /etc
+          %_localstatedir /var
+          %_lib           lib64
+
+          # --- Kill hardening/annobin/LTO flag components ---
+          %_hardened_cflags     %{nil}
+          %_hardened_ldflags    %{nil}
+          %_annotation_cflags   %{nil}
+          %_annotation_ldflags  %{nil}
+          %_lto_cflags          %{nil}
+          %_fortify_level       0
+
+          # --- Belt-and-suspenders: override the final composed flag macro directly ---
+          %__global_compiler_flags -O2 -fexceptions -g -grecord-gcc-switches -pipe -Wall -Wno-complain-wrong-lang -Wno-error=format-security -Wp,-D_GLIBCXX_ASSERTIONS
+          %build_cflags    %{__global_compiler_flags}
+          %build_cxxflags  %{__global_compiler_flags}
+          %build_ldflags   -Wl,-z,relro -Wl,--as-needed
+          EOF
+          
       - name: Build all packages (skip dependency check)
         run: |
           for pkgdir in Packages/*/; do
