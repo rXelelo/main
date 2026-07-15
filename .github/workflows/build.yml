@@ -31,9 +31,8 @@ jobs:
       - name: Set up RPM build tree
         run: |
           rpmdev-setuptree
-          
+
           rm -f /usr/lib/rpm/macros.d/macros.*
-          rm /usr/lib/rpm/macros
           rm /usr/lib/rpm/redhat/macros
 
           cat > ~/.rpmmacros << EOF
