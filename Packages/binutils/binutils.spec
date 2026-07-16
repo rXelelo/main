@@ -83,7 +83,7 @@ make %{?_smp_mflags}
 cd ../binutils-build
 %make_install tooldir=%{_prefix}
 
-mv %{buildroot}/github/home/rpmbuild/BUILD/binutils-2.46.1-build/BUILDROOT/usr/lib64/* %{buildroot}/usr/lib64
+#mv %{buildroot}/github/home/rpmbuild/BUILD/binutils-2.46.1-build/BUILDROOT/usr/lib64/* %{buildroot}/usr/lib64
 
 # Remove libtool archives, we ship shared libs instead
 find %{buildroot} -name '*.la' -delete
