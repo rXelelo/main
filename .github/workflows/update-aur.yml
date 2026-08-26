@@ -14,7 +14,7 @@ jobs:
       - name: Prepear Container
         run: |
           pacman -Sy base-devel pacman-contrib sudo git curl sed jq --noconfirm
-          useradd -m builder
+          useradd -d /github/home/builder -m builder
           usermod -aG wheel builder
           sudo -Eu builder mkdir -p ~/.ssh
           cat > /home/builder/.ssh/id_ed25519 << 'EOF'
