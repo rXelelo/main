@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Prepear Container
         run: |
-          pacman -Sy base-devel pacman-contrib sudo git curl sed jq --no-confirm
+          pacman -Sy base-devel pacman-contrib sudo git curl sed jq --noconfirm
           useradd -m builder
           usermod -aG wheel builder
           sudo -Eu builder mkdir -p ~/.ssh
